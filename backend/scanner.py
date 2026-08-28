@@ -2,16 +2,19 @@ import socket
 import concurrent.futures
 import ipaddress
 
-PORT = 22
+PORTS = [22, 80, 443, 23]
 
 def scan_port(ip):
 
-    #--------------------------IPv4-------------TCP
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+    for PORT in PORTS:
+        #--------------------------IPv4-------------TCP
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
 
-        client_socket.settimeout(1)    
-        result = client_socket.connect_ex((ip, PORT))
-        return result == 0
+            client_socket.settimeout(1)    
+            result = client_socket.connect_ex((ip, PORT))
+            if result == 0:
+                return ip, True
+    return ip, False
 
 def scan_network(subnet):
 

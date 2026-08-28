@@ -11,27 +11,30 @@ function App() {
   const [results, setResults] = useState([])
   const [error, setError] = useState('')
 
-  const handleScan = async () => {
+  const handleScan = () => {
     if (!subnet) return;
     
-    setLoading(true)
-    setError('')
-    setResults([])
+    setLoading(true);
+    setResults([]); 
 
-    try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/scan`, {
-        params: { subnet }
-      });
-      
-      if (response.data.status === "success") {
-        setResults(response.data.results)
-      }
-    } catch (err) {
-      setError('Connection failed. Please ensure the FastAPI backend is running.')
-    } finally {
-      setLoading(false)
-    }
-  }
+    const eventSource = new EventSource(`http://localhost:8000/api/scan/stream?subnet=${encodeURIComponent(subnet)}`);
+
+    eventSource.onmessage = (event) => {
+        const newDevice = JSON.parse(event.data);
+        setResults((prevResults) => [...prevResults, newDevice]);
+    };
+
+    eventSource.addEventListener("close", () => {
+        eventSource.close();
+        setLoading(false);
+    });
+
+    eventSource.onerror = (error) => {
+        console.error("Stream Error:", error);
+        eventSource.close();
+        setLoading(false);
+    };
+};
 
   return (
     <div className="min-h-screen p-6 md:p-12 selection:bg-bronze selection:text-white">
