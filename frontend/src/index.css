@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bronze: #cd7f32;
+  --color-navy: #0a1f44;
+  --color-navy-dark: #0f172a;
+}
+
+body {
+  background-color: var(--color-navy-dark);
+  color: white;
+}

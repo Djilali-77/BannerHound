@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+requests
+netmiko
+pydantic
+python-dotenv
+sqlmodel
+pyjwt
+python-multipart
