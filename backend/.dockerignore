@@ -5,3 +5,7 @@ venv/
 data/
 .env
 .pytest_cache/
+.ruff_cache/
+tests/
+pytest.ini
+requirements-dev.txt
