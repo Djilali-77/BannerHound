@@ -5,7 +5,6 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688)
 ![React](https://img.shields.io/badge/React-Vite-61DAFB)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)
-![License](https://img.shields.io/badge/License-MIT-green)
 
 **Credential-less network scanner and OS fingerprinter with live results and risk scoring.**
 
