@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+.env
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+
+# Scan results (private network data, never commit)
+backend/data/
+*.csv
+
+# OS and editors
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
