@@ -4,12 +4,16 @@ Each function connects to ONE service, reads the identification string
 the server volunteers, and disconnects immediately ("hit and run").
 No authentication is ever attempted.
 """
+import http.client
+import logging
 import socket
 import ssl
 import urllib.error
 import urllib.request
 
 import paramiko
+
+logger = logging.getLogger("bannerhound.banner")
 
 # Seconds to wait for each network operation
 TIMEOUT = 1.5
@@ -43,12 +47,12 @@ def get_ssh_banner(ip: str, port: int = 22) -> str | None:
         transport = paramiko.Transport(sock)
         try:
             transport.start_client(timeout=TIMEOUT)
-        except Exception:
+        except (paramiko.SSHException, EOFError, OSError) as err:
             # The version string is exchanged before the key exchange,
             # so it can still be available even if the handshake fails.
-            pass
+            logger.debug("SSH handshake with %s did not complete: %s", ip, err)
         return transport.remote_version or None
-    except Exception:
+    except (OSError, paramiko.SSHException):
         return None
     finally:
         if transport is not None:
@@ -67,7 +71,8 @@ def _http_banner(ip: str, scheme: str) -> str | None:
     except urllib.error.HTTPError as err:
         # 301, 401, 403, 405... still carry a valid Server header
         headers = err.headers
-    except Exception:
+    except (OSError, http.client.HTTPException, ValueError):
+        # Connection refused, timeout, TLS error, malformed response or bad URL
         return None
 
     server = headers.get("Server")
@@ -88,7 +93,7 @@ def get_telnet_banner(ip: str, port: int = 23) -> str | None:
         with socket.create_connection((ip, port), timeout=TIMEOUT) as sock:
             try:
                 raw = sock.recv(1024)
-            except socket.timeout:
+            except TimeoutError:
                 raw = b""
     except OSError:
         return None
