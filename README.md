@@ -1,4 +1,4 @@
-# 🐕 BannerHound
+# BannerHound
 
 ![CI](https://github.com/Djilali-77/BannerHound/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
