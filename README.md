@@ -62,6 +62,8 @@ Open <http://localhost:5173> and scan `172.28.0.0/24`. You should see:
 | 172.28.0.21 | Linux Server (Debian) | Low |
 | 172.28.0.30 | Legacy Cisco/Router (Telnet) | High |
 
+> On Linux, the Docker gateway `172.28.0.1` (your own machine) may also appear in the results if it runs an SSH server. That is expected.
+
 Stop everything with:
 
 ```bash
