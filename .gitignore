@@ -19,3 +19,5 @@ backend/data/
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+#To add file csv !docs/example_report.csv
