@@ -1,9 +1,3 @@
-fastapi
-uvicorn
-requests
-netmiko
-pydantic
-python-dotenv
-sqlmodel
-pyjwt
-python-multipart
+fastapi>=0.110
+uvicorn[standard]>=0.29
+paramiko>=3.4
