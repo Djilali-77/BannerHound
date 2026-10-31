@@ -186,15 +186,5 @@ The tests use local fake services (sockets and HTTP servers on `127.0.0.1`), so 
 
 This tool is designed for **authorized network auditing and educational purposes only**. Only scan networks you own or have explicit permission to test.
 
-## 📝 License
-
-[MIT](LICENSE)
-
-## 🔗 More projects
-
-| Project | Description |
-|---|---|
-| [AI-Powered IDS](https://github.com/Djilali-77/AI-Powered-IDS) | Anomaly-based intrusion detection with a PyTorch autoencoder |
-| [DzAuto-Radar](https://github.com/Djilali-77/car-market-pipeline) | Algerian car market data pipeline with an ML model and dashboard |
 
 🌐 **Portfolio:** https://portfolio-morvox.vercel.app
