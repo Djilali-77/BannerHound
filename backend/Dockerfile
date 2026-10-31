@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.15-slim
 
 # No .pyc files, and logs appear immediately in `docker compose logs`
 ENV PYTHONDONTWRITEBYTECODE=1 \
