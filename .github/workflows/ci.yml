@@ -79,10 +79,12 @@ jobs:
 
       - name: Scan the lab network
         run: |
+          # The Docker gateway (172.28.0.1) is the runner itself and may also show up,
+          # so we only check that the 5 lab devices are present.
           for attempt in 1 2 3 4 5; do
             curl -fsS "http://localhost:8000/api/scan?subnet=172.28.0.0/24" -o scan.json
-            if python3 -c "import json,sys; ips={r['IP'] for r in json.load(open('scan.json'))['results']}; sys.exit(0 if len(ips)==5 else 1)"; then
-              echo "Lab scan OK: 5 hosts found"
+            if python3 -c "import json; ips={r['IP'] for r in json.load(open('scan.json'))['results']}; want={'172.28.0.10','172.28.0.11','172.28.0.20','172.28.0.21','172.28.0.30'}; print('found:', sorted(ips)); raise SystemExit(0 if want <= ips else 1)"; then
+              echo "Lab scan OK: all 5 lab devices found"
               exit 0
             fi
             echo "Attempt $attempt: the lab is not ready yet"
