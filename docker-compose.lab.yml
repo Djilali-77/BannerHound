@@ -1,0 +1,65 @@
+# BannerHound mini lab: a fake network full of devices to scan.
+#
+# Start:  docker compose -f docker-compose.yml -f docker-compose.lab.yml up --build
+# Scan:   172.28.0.0/24
+# Stop:   docker compose -f docker-compose.yml -f docker-compose.lab.yml down
+
+services:
+  # Attach the backend to the lab network so it can reach the fake devices
+  backend:
+    networks:
+      - default
+      - lab
+
+  # Web server (plain HTTP, expected risk: Medium)
+  lab-nginx:
+    image: nginx:alpine
+    container_name: lab-nginx
+    networks:
+      lab:
+        ipv4_address: 172.28.0.10
+
+  # Web server (plain HTTP, expected risk: Medium)
+  lab-apache:
+    image: httpd:alpine
+    container_name: lab-apache
+    networks:
+      lab:
+        ipv4_address: 172.28.0.11
+
+  # Ubuntu server with OpenSSH (expected risk: Low)
+  lab-ubuntu:
+    build:
+      context: ./lab/ssh
+      args:
+        BASE_IMAGE: ubuntu:22.04
+    container_name: lab-ubuntu
+    networks:
+      lab:
+        ipv4_address: 172.28.0.20
+
+  # Debian server with OpenSSH (expected risk: Low)
+  lab-debian:
+    build:
+      context: ./lab/ssh
+      args:
+        BASE_IMAGE: debian:bookworm-slim
+    container_name: lab-debian
+    networks:
+      lab:
+        ipv4_address: 172.28.0.21
+
+  # Legacy Cisco-like device exposing Telnet (expected risk: High)
+  lab-cisco:
+    build: ./lab/telnet
+    container_name: lab-cisco
+    networks:
+      lab:
+        ipv4_address: 172.28.0.30
+
+networks:
+  lab:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
