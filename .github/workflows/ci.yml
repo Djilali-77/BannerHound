@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# Cancel the previous run of the same branch when a new commit arrives
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.12", "3.13"]
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Run tests
+        run: pytest
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+  docker:
+    name: Docker smoke test
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    env:
+      COMPOSE: docker compose -f docker-compose.yml -f docker-compose.lab.yml
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate the compose files
+        run: $COMPOSE config -q
+
+      - name: Build and start the stack with the lab
+        run: $COMPOSE up --build -d --wait --wait-timeout 180
+
+      - name: Scan the lab network
+        run: |
+          for attempt in 1 2 3 4 5; do
+            curl -fsS "http://localhost:8000/api/scan?subnet=172.28.0.0/24" -o scan.json
+            if python3 -c "import json,sys; ips={r['IP'] for r in json.load(open('scan.json'))['results']}; sys.exit(0 if len(ips)==5 else 1)"; then
+              echo "Lab scan OK: 5 hosts found"
+              exit 0
+            fi
+            echo "Attempt $attempt: the lab is not ready yet"
+            sleep 5
+          done
+          echo "Lab scan failed"
+          cat scan.json
+          exit 1
+
+      - name: Download the CSV report
+        run: |
+          curl -fsS http://localhost:8000/api/download-report -o report.csv
+          head -n 1 report.csv | grep -q "^IP,Status"
+
+      - name: Show logs on failure
+        if: failure()
+        run: $COMPOSE logs
+
+      - name: Stop the stack
+        if: always()
+        run: $COMPOSE down -v
