@@ -1,16 +1,28 @@
-version: '3.8'
-
 services:
   backend:
     build: ./backend
+    container_name: bannerhound-backend
     ports:
       - "8000:8000"
+    environment:
+      # Browser origins allowed to call the API (comma separated)
+      - CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+      # Keep scanning limited to private networks
+      - ALLOW_PUBLIC_SCAN=false
     volumes:
-      - ./backend/network_audit.db:/backend/network_audit.db
+      # CSV reports survive container restarts
+      - reports:/app/data
+    restart: unless-stopped
 
   frontend:
     build: ./frontend
+    container_name: bannerhound-frontend
     ports:
       - "5173:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  reports:
